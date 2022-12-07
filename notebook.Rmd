@@ -7,3 +7,8 @@ output:
   pdf_document: default
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(tidyverse)
+```
