@@ -70,6 +70,41 @@ annualTemperature %>%
     labs(title = 'Annual average temperature from 1900 - 2012')
 ```
 
+Create a new dataframe for predicted average temperature from linear regression model by each country in 1900 and 2012
+
+```{r}
+countryList = unique(annualTemperature$Country)
+yearDf = data.frame(Year = c(1900, 2012))
+
+predictedAverageTemperature = tibble()
+
+for (country in countryList) {
+  AverageTemperature = predict(
+                lm(AverageTemperature~Year, filter(annualTemperature, Country == country)),
+                yearDf) %>%
+              as.double
+  
+  predictedAverageTemperature <- bind_rows(
+    predictedAverageTemperature,
+    tibble(
+      Country = rep(country, times = length(yearDf)),
+      Year =  yearDf$Year,
+      AverageTemperature,
+    )
+  )
+}
+
+predictedAverageTemperature
+```
+
+```{r}
+predictedAverageTemperature %>%
+  filter(Country %in% c('Estonia', 'Thailand', 'Africa', 'Australia', 'United States', 'China', 'India')) %>%
+  ggplot(aes(x=Year, y=AverageTemperature, color=Country)) +
+    geom_line() +
+    labs(title = 'Annual average temperature from 1900 - 2012 using linear regression model')
+```
+
 ## 2. Global CO2 emission by country
 
 Source: <https://ourworldindata.org/co2-dataset-sources>
