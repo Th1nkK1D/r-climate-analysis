@@ -12,39 +12,40 @@ knitr::opts_chunk$set(echo = FALSE)
 
 library(tidyverse)
 ```
-# Introduction
+
+# 1. Introduction
 
 Global warming has been a urgent topic for the current century. There are consistent new regulations and directives which aim to reduce the co2 emissions in hopes of slowing down the increasing of land temperatures. For that purpose, the researchers have decided to analyse two datasets a uncover any relationships which may exist. 
 
-## Research Questions
+## 1.1 Research Questions
 
 The researchers have proposed 2 research questions to direct the analysis of such large data:
 
-### 1. What is the correlation between global CO2 emissions and global land warming from 1900-2015?
+### RQ1: What is the correlation between global CO2 emissions and global land warming from 1900-2015?
 
 The researchers hypothesise that there is a positive correlation between CO2 emissions and global land warming, therefore an increase in CO2 emissions results in increased land temperatures.
 
 The null hypothesis is that there is no correlation between CO2 emissions and land temperature and that they are independant of each other. 
 
-### 2. Who are the evil emitters and who are the unlucky receivers?
+### RQ2: Who are the evil emitters and who are the unlucky receivers?
 
   2.1. Does the country with highest CO2 emission also get affected the most by global land warming?
   
   2.2. Does some other country get affected by another countries high CO2 emissions?
 
-# The dataset
+# 2. Datasets and exploratory analysis
 
-## 1.Global land temperature data by country
+## 2.1 Global land temperature data by country
 
-The researchers are using a dataset which contains data regrding the Global land temperature by country. 
+The researchers are using a dataset which contains data regarding the Global land temperature by country. 
 Source: <https://data.world/data-society/global-climate-change-data>
-
-### Exploratory analysis
 
 ```{r}
 temperature <- read_csv('GlobalLandTemperatures_GlobalLandTemperaturesByCountry.csv', show_col_types = FALSE)
 glimpse(temperature)
 ```
+
+Need to explain more about each columns
 
 Check the datetime column. The newest record is in 2013-09-01. The dataset contains record of every 1st of the month.
 
@@ -61,14 +62,36 @@ temperature %>%
     labs(title = 'Monthly average temperature from 2002-2012')
 ```
 
-Calculate annual average temperature from 1990 - 2012 and drop NAs row
+
+## 2.2 Global CO2 emission by country
+
+Source: <https://ourworldindata.org/co2-dataset-sources>
+
+```{r}
+co2emission <- read_csv('annual-co2-emissions-per-country.csv', show_col_types = FALSE)
+glimpse(co2emission)
+```
+
+Need to explain more about each columns
+
+Check the year column. The dataset contain annual data. The newest record is in 2021
+
+```{r}
+sort(unique(co2emission$Year), decreasing = TRUE)[1:10]
+```
+
+# 3. Data cleaning and transformation
+
+## 3.1 Annual temperature by country
+
+Calculate annual average temperature from 1913 - 2012 and drop NAs row
 
 ```{r}
 annualTemperature <- temperature %>%
   drop_na %>%
   mutate(Year = as.integer(format(dt, '%Y'))) %>%
   select(-dt) %>%
-  filter(between(Year, 1900, 2022)) %>%
+  filter(between(Year, 1913, 2012)) %>%
   group_by(Country, Year) %>%
   summarise(AverageTemperature = mean(AverageTemperature), AverageTemperatureUncertainty = mean(AverageTemperatureUncertainty))
 
@@ -79,84 +102,32 @@ annualTemperature
 annualTemperature %>%
   filter(Country %in% c('Estonia', 'Thailand', 'Africa', 'Australia', 'United States', 'China', 'India')) %>%
   ggplot(aes(x=Year, y=AverageTemperature, color=Country)) +
-    geom_line() +
-    labs(title = 'Annual average temperature from 1900 - 2012')
-```
-
-```{r}
-annualTemperature %>%
-  filter(Country %in% c('Estonia', 'Thailand', 'Africa', 'Australia', 'United States', 'China', 'India')) %>%
-  ggplot(aes(x=Year, y=AverageTemperature, color=Country)) +
     geom_point(size = 0.8, alpha = 0.3) +
     geom_smooth(method='lm') +
-    labs(title = 'Annual average temperature from 1900 - 2012')
+    labs(title = 'Annual average temperature from 1913 - 2012')
 ```
 
-Create a new dataframe for predicted average temperature from linear regression model by each country in 1900 and 2012
 
-```{r}
-countryList = unique(annualTemperature$Country)
-yearDf = data.frame(Year = c(1900, 2012))
+## 3.2 Co2 emission by country
 
-predictedAverageTemperature = tibble()
-
-for (country in countryList) {
-  AverageTemperature = predict(
-                lm(AverageTemperature~Year, filter(annualTemperature, Country == country)),
-                yearDf) %>%
-              as.double
-  
-  predictedAverageTemperature <- bind_rows(
-    predictedAverageTemperature,
-    tibble(
-      Country = rep(country, times = length(yearDf)),
-      Year =  yearDf$Year,
-      AverageTemperature,
-    )
-  )
-}
-
-predictedAverageTemperature
-```
-
-```{r}
-predictedAverageTemperature %>%
-  filter(Country %in% c('Estonia', 'Thailand', 'Africa', 'Australia', 'United States', 'China', 'India')) %>%
-  ggplot(aes(x=Year, y=AverageTemperature, color=Country)) +
-    geom_line() +
-    labs(title = 'Annual average temperature from 1900 - 2012 using linear regression model')
-```
-
-## 2. Global CO2 emission by country
-
-Source: <https://ourworldindata.org/co2-dataset-sources>
-
-```{r}
-co2emission <- read_csv('annual-co2-emissions-per-country.csv', show_col_types = FALSE)
-glimpse(co2emission)
-```
-Check the year column. The dataset contain annual data. The newest record is in 2021
-
-```{r}
-sort(unique(co2emission$Year), decreasing = TRUE)[1:10]
-```
-
-Filter only record from 1900-2012
+Filter only record from 1913-2012
 
 ```{r}
 co2emission %>%
-  filter(between(Year, 1900, 2012))
+  filter(between(Year, 1913, 2012))
 ```
+
 ```{r}
 co2emission %>%
-  filter(between(Year, 1900, 2012)) %>%
+  filter(between(Year, 1913, 2012)) %>%
   filter(Entity %in% c('Estonia', 'Thailand', 'Africa', 'Australia', 'United States', 'China', 'India')) %>%
   ggplot(aes(x=Year, y=`Annual CO2 emissions`, color=Entity)) +
     geom_line() +
-    labs(title = 'Annual CO2 emissions from 1900-2012')
+    labs(title = 'Annual CO2 emissions from 1913-2012')
 ```
 
-## Correlation Analysis (Research question 1)
+
+# RQ1: Correlation Analysis
 
 I have copied your section of code and added extra years to incorporate more data points for more statistical power and validity.
 
@@ -221,3 +192,40 @@ ggscatter(TaskFrame, x="AvgTempRevised.AverageTemperature", y="Avgco2..Annual.CO
 
 ```
 
+
+# RQ2
+
+Create a new dataframe for predicted average temperature from linear regression model by each country in 1913 and 2012
+
+```{r}
+countryList = unique(annualTemperature$Country)
+yearDf = data.frame(Year = c(1913, 2012))
+
+predictedAverageTemperature = tibble()
+
+for (country in countryList) {
+  AverageTemperature = predict(
+                lm(AverageTemperature~Year, filter(annualTemperature, Country == country)),
+                yearDf) %>%
+              as.double
+  
+  predictedAverageTemperature <- bind_rows(
+    predictedAverageTemperature,
+    tibble(
+      Country = rep(country, times = length(yearDf)),
+      Year =  yearDf$Year,
+      AverageTemperature,
+    )
+  )
+}
+
+predictedAverageTemperature
+```
+
+```{r}
+predictedAverageTemperature %>%
+  filter(Country %in% c('Estonia', 'Thailand', 'Africa', 'Australia', 'United States', 'China', 'India')) %>%
+  ggplot(aes(x=Year, y=AverageTemperature, color=Country)) +
+    geom_line() +
+    labs(title = 'Annual average temperature from 1913 - 2012 using linear regression model')
+```
