@@ -1,6 +1,6 @@
 ---
 title: "Climate changes project"
-author: "Paul Markus and Withee Poositasai"
+author: "Paul-Markus Orav and Withee Poositasai"
 date: "`r Sys.Date()`"
 output:
   html_document: default
@@ -12,12 +12,34 @@ knitr::opts_chunk$set(echo = FALSE)
 
 library(tidyverse)
 ```
+# Introduction
+
+Global warming has been a urgent topic for the current century. There are consistent new regulations and directives which aim to reduce the co2 emissions in hopes of slowing down the increasing of land temperatures. For that purpose, the researchers have decided to analyse two datasets a uncover any relationships which may exist. 
+
+## Research Questions
+
+The researchers have proposed 2 research questions to direct the analysis of such large data:
+
+### 1. What is the correlation between global CO2 emissions and global land warming from 1900-2015?
+
+The researchers hypothesise that there is a positive correlation between CO2 emissions and global land warming, therefore an increase in CO2 emissions results in increased land temperatures.
+
+The null hypothesis is that there is no correlation between CO2 emissions and land temperature and that they are independant of each other. 
+
+### 2. Who are the evil emitters and who are the unlucky receivers?
+
+  2.1. Does the country with highest CO2 emission also get affected the most by global land warming?
+  
+  2.2. Does some other country get affected by another countries high CO2 emissions?
 
 # The dataset
 
 ## 1.Global land temperature data by country
 
+The researchers are using a dataset which contains data regrding the Global land temperature by country. 
 Source: <https://data.world/data-society/global-climate-change-data>
+
+### Exploratory analysis
 
 ```{r}
 temperature <- read_csv('GlobalLandTemperatures_GlobalLandTemperaturesByCountry.csv', show_col_types = FALSE)
@@ -133,3 +155,69 @@ co2emission %>%
     geom_line() +
     labs(title = 'Annual CO2 emissions from 1900-2012')
 ```
+
+## Correlation Analysis (Research question 1)
+
+I have copied your section of code and added extra years to incorporate more data points for more statistical power and validity.
+
+
+```{r, include=FALSE} 
+countryList = unique(annualTemperature$Country)
+yearDf = data.frame(Year = c(1907, 1917, 1927, 1937, 1947, 1957, 1967, 1977, 1987, 1997, 2012))
+
+predictedAverageTemperature = tibble()
+
+for (country in countryList) {
+  AverageTemperature = predict(
+                lm(AverageTemperature~Year, filter(annualTemperature, Country == country)),
+                yearDf) %>%
+              as.double
+  
+  predictedAverageTemperature <- bind_rows(
+    predictedAverageTemperature,
+    tibble(
+      Country = rep(country, times = length(yearDf)),
+      Year =  yearDf$Year,
+      AverageTemperature,
+    )
+  )
+}
+
+predictedAverageTemperature
+```
+
+Here I have created two vectors which can be used in a correlation test
+
+```{r}
+predictedAverageTemperature %>%
+  filter(Country %in% c('Estonia', 'Thailand', 'Africa', 'Australia', 'United States', 'China', 'India'))
+
+AvgTempRevised <- predictedAverageTemperature %>%
+  filter(Country %in% c('Estonia', 'Thailand', 'Africa', 'Australia', 'United States', 'China', 'India'))
+
+Avgco2 <- co2emission %>%
+  filter(Year %in% c(1907, 1917, 1927, 1937, 1947, 1957, 1967, 1977, 1987, 1997, 2012)) %>%
+  filter(Entity %in% c('Estonia', 'Thailand', 'Africa', 'Australia', 'United States', 'China', 'India'))
+
+Avgco2
+```
+
+
+```{r Library, include=FALSE}
+library("ggpubr")
+```
+
+Here I have run a preliminary correlation test, however I don't think that makes too much sense. However perhaps I just cannot read it properly at the moment. 
+
+```{r}
+cor.test(AvgTempRevised$AverageTemperature,Avgco2$`Annual CO2 emissions`, method = c("pearson", "kendall", "spearman"))
+TaskFrame <- data.frame(AvgTempRevised$AverageTemperature,Avgco2$`Annual CO2 emissions`)
+TaskFrame
+
+ggscatter(TaskFrame, x="AvgTempRevised.AverageTemperature", y="Avgco2..Annual.CO2.emissions.",
+          add="reg.line", conf.int=TRUE,
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Average Temperatures", ylab = "Co2 Emissions")
+
+```
+
