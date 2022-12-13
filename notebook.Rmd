@@ -30,9 +30,10 @@ The null hypothesis is that there is no correlation between CO2 emissions and la
 
 ### RQ2: Who are the evil emitters and who are the unlucky receivers?
 
-  2.1. Does the country with highest CO2 emission also get affected the most by global land warming?
+  2.1. Which country produce high CO2 emission but received less effected from global land warming? (evil emitters)
   
-  2.2. Does some other country get affected by another countries high CO2 emissions?
+  2.2. Which country produce low CO2 emission but received high effected from global land warming? (unlucky receivers)
+  
 
 # 2. Datasets and exploratory analysis
 
@@ -307,9 +308,14 @@ For this report, the researchers have decided to look at the CO2 emissions and l
 Estonia is the only country which seems to have no significant (p=0.21) result for the correlation and also with a smaller coefficient (r(98)=.13) than other places. All other locations had highly significant (p<.0001) correlation results. Africa showed the highest CO2 emission and land temperature correlation with a result of r(98)=0.80. After Africa, in descending order, there is Australia (r(98)=0.69), China (r(98)=0.68), India (r(98)=0.66), Thailand (r(98)=0.55), and United States (r(98)=0.47). 
 
 
-# RQ2
+# Research Questions 2: The evil emitters and unlucky receivers
 
-Create a new dataframe for predicted average temperature from linear regression model by each country in 1913 and 2012
+From the EDA, we will revise 2 sub-questions as following:
+
+- RQ 2.1. Which country is the evil emitter, ranking in the highest 25% CO2 emission (Q4) and the lowest 25% land temperature change (Q1) from 1913-2012?
+- RQ 2.2. Which country is the unlucky receivers, ranking in the lowest 25% CO2 emission (Q1) and the highest 25% land temperature change (Q1) from 1913-2012?
+
+Since the annual temperatures were swinging between each each. So I create an estimation of temperature change of each country between 1913 and 2012 using the linear regression model with the land temperature dataset.
 
 ```{r}
 countryList = unique(annualTemperature$Country)
@@ -333,17 +339,13 @@ for (country in countryList) {
   )
 }
 
-predictedAverageTemperature
-```
-
-```{r}
 predictedAverageTemperature %>%
   filter(Country %in% c('Estonia', 'Thailand', 'South Africa', 'Australia', 'United States', 'China', 'India')) %>%
   ggplot(aes(x=Year, y=AverageTemperature, color=Country)) +
     geom_line() +
     labs(title = 'Annual average temperature from 1913 - 2012 using linear regression model')
 ```
-Find temperature change from 1913 - 2012 of each country
+From the model, temperature change from 1913 - 2012 of each country are as following:
 
 ```{r}
 estimatedTemperatureChange <- predictedAverageTemperature %>%
@@ -357,13 +359,15 @@ estimatedTemperatureChange
 summary(estimatedTemperatureChange$`Temperature change`)
 ```
 
+The distribution is very close to the normal distribution which is unexpected from us.
+
 ```{r}
 ggplot(estimatedTemperatureChange, aes(x = `Temperature change`)) +
   geom_histogram(bins = 30) +
-  labs(title = 'Distribution of estimated temperature change in each country from 1913 - 2012')
+  labs(title = 'Distribution of estimated temperature change in each country from 1913-2012')
 ```
 
-Find total CO2 emission from 1913 - 2012 of each country
+Then we find total CO2 emission from 1913 - 2012 of each country from CO2 emission dataset.
 
 ```{r}
 totalCo2Emission <- selectedCo2Emission %>%
@@ -380,13 +384,18 @@ totalCo2Emission
 summary(totalCo2Emission$`CO2 emissions (MT)`)
 ```
 
+The distribution is ultimately skewed to the right. Meaning most country emit just a few co2 but a few country, which can be considered as outlier, emit a lot.
+
 ```{r}
 ggplot(totalCo2Emission, aes(x = `CO2 emissions (MT)`)) +
-  geom_histogram(bins = 30) +
-  labs(title = 'Distribution of estimated temperature change in each country from 1913 - 2012')
+  geom_histogram(bins = 60) +
+  labs(title = 'Distribution of total co2 emission by each country from 1913-2012')
 ```
 
-Combine estimated temperature changes and CO2 emission for each country from 1913 - 2012
+Then we join both tibble, estimated temperature changes and CO2 emission for each country from 1913 - 2012, together with additional columns:
+
+- **Ratio** is the temperature change per CO2 emissions (Million tons)
+- **Group** can be "Evil emitter" (In CO2 emissions Q4 and Temperature change Q1), "Unlucky receiver" (In CO2 emissions Q1 and Temperature change Q4) or "Neutral" (Other)
 
 ```{r}
 countryTemperatureChangeAndEmission <- 
@@ -404,8 +413,11 @@ countryTemperatureChangeAndEmission
 
 ```{r}
 ggplot(countryTemperatureChangeAndEmission, aes(x = Group)) +
-  geom_bar()
+  geom_bar() + 
+  labs(title = 'Number of country in each group')
 ```
+
+Here is the country of each group with temperature changes and CO2 emission of each country from 1913-2012
 
 ```{r}
 ggplot(countryTemperatureChangeAndEmission,
@@ -413,9 +425,9 @@ ggplot(countryTemperatureChangeAndEmission,
        ) +
   geom_point(alpha = 0.8) +
   geom_text(vjust = 1.4, size = 3, alpha = 0.6) +
-  geom_vline(xintercept = mean(countryTemperatureChangeAndEmission$`CO2 emissions (MT)`)) +
-  geom_hline(yintercept = mean(countryTemperatureChangeAndEmission$`Temperature change`))
+  labs(title = 'Temperature changes and CO2 emission of each country from 1913-2012')
 ```
+The above chart is difficult to read. Since a lot of countries has relatively low emission, and we are not interested in neutral country, here is the plot that filter out neutral country:
 
 ```{r}
 countryTemperatureChangeAndEmission %>%
@@ -423,8 +435,27 @@ countryTemperatureChangeAndEmission %>%
 ggplot(aes(x = `CO2 emissions (MT)`, y = `Temperature change`, label = Country, color = Group)) +
   geom_point(alpha = 0.8) +
   geom_text(vjust = 1.4, size = 3, alpha = 0.6) +
-  geom_vline(xintercept = mean(countryTemperatureChangeAndEmission$`CO2 emissions (MT)`)) +
-  geom_hline(yintercept = mean(countryTemperatureChangeAndEmission$`Temperature change`))
+  labs(title = 'The evil emitters and unlucky receivers (1913-2012)')
 ```
+The evil emitters, ranking by smallest temperature changes per co2 emission ratio, are:
+
+```{r}
+countryTemperatureChangeAndEmission %>%
+  filter(Group == 'Evil emitter') %>%
+  select(-Group) %>%
+  arrange(Ratio)
+```
+
+The unlucky receiver, ranking by highest temperature changes per co2 emission ratio, are:
+
+```{r}
+countryTemperatureChangeAndEmission %>%
+  filter(Group == 'Unlucky receiver') %>%
+  select(-Group) %>%
+  arrange(desc(Ratio))
+```
+
+However, judging CO2 for the whole country might not be fair since smaller country are more likely to produce less co2. CO2 emission per capita can be used in the future study.
+
 
 # Discussion
