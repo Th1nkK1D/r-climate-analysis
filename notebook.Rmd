@@ -21,7 +21,7 @@ Global warming has been a urgent topic for the current century. There are consis
 
 The researchers have proposed 2 research questions to direct the analysis of such large data:
 
-### RQ1: What is the correlation between global CO2 emissions and global land warming from 1900-2015?
+### RQ1: What is the correlation between global CO2 emissions and global land warming from 1913-2012?
 
 The researchers hypothesise that there is a positive correlation between CO2 emissions and global land warming, therefore an increase in CO2 emissions results in increased land temperatures.
 
@@ -107,6 +107,31 @@ annualTemperature %>%
     labs(title = 'Annual average temperature from 1913 - 2012')
 ```
 
+```{r Temperature Per Country}
+AvgTemp <- annualTemperature %>%
+  filter(Country %in% c('Estonia', 'Thailand', 'Africa', 'Australia', 'United States', 'China', 'India'))
+
+AvgTempEstonia <- annualTemperature %>%
+  filter(Country %in% c('Estonia'))
+
+AvgTempThailand <- annualTemperature %>%
+  filter(Country %in% c('Thailand'))
+
+AvgTempAfrica <- annualTemperature %>%
+  filter(Country %in% c('Africa'))
+
+AvgTempAustralia <- annualTemperature %>%
+  filter(Country %in% c('Australia'))
+
+AvgTempUS <- annualTemperature %>%
+  filter(Country %in% c('United States'))
+
+AvgTempChina <- annualTemperature %>%
+  filter(Country %in% c('China'))
+
+AvgTempIndia <- annualTemperature %>%
+  filter(Country %in% c('India'))
+```
 
 ## 3.2 Co2 emission by country
 
@@ -126,71 +151,103 @@ co2emission %>%
     labs(title = 'Annual CO2 emissions from 1913-2012')
 ```
 
-
-# RQ1: Correlation Analysis
-
-I have copied your section of code and added extra years to incorporate more data points for more statistical power and validity.
-
-
-```{r, include=FALSE} 
-countryList = unique(annualTemperature$Country)
-yearDf = data.frame(Year = c(1907, 1917, 1927, 1937, 1947, 1957, 1967, 1977, 1987, 1997, 2012))
-
-predictedAverageTemperature = tibble()
-
-for (country in countryList) {
-  AverageTemperature = predict(
-                lm(AverageTemperature~Year, filter(annualTemperature, Country == country)),
-                yearDf) %>%
-              as.double
-  
-  predictedAverageTemperature <- bind_rows(
-    predictedAverageTemperature,
-    tibble(
-      Country = rep(country, times = length(yearDf)),
-      Year =  yearDf$Year,
-      AverageTemperature,
-    )
-  )
-}
-
-predictedAverageTemperature
-```
-
-Here I have created two vectors which can be used in a correlation test
-
-```{r}
-predictedAverageTemperature %>%
-  filter(Country %in% c('Estonia', 'Thailand', 'Africa', 'Australia', 'United States', 'China', 'India'))
-
-AvgTempRevised <- predictedAverageTemperature %>%
-  filter(Country %in% c('Estonia', 'Thailand', 'Africa', 'Australia', 'United States', 'China', 'India'))
+```{r Co2 Per Country}
 
 Avgco2 <- co2emission %>%
-  filter(Year %in% c(1907, 1917, 1927, 1937, 1947, 1957, 1967, 1977, 1987, 1997, 2012)) %>%
+  filter(between(Year, 1913, 2012)) %>%
   filter(Entity %in% c('Estonia', 'Thailand', 'Africa', 'Australia', 'United States', 'China', 'India'))
 
-Avgco2
+Avgco2Estonia <- co2emission %>%
+  filter(between(Year, 1913, 2012)) %>%
+  filter(Entity %in% c('Estonia'))
+
+Avgco2Thailand <- co2emission %>%
+  filter(between(Year, 1913, 2012)) %>%
+  filter(Entity %in% c('Thailand'))
+
+Avgco2Africa <- co2emission %>%
+  filter(between(Year, 1913, 2012)) %>%
+  filter(Entity %in% c('Africa'))
+
+Avgco2Australia <- co2emission %>%
+  filter(between(Year, 1913, 2012)) %>%
+  filter(Entity %in% c('Australia'))
+
+Avgco2US <- co2emission %>%
+  filter(between(Year, 1913, 2012)) %>%
+  filter(Entity %in% c('United States'))
+
+Avgco2China <- co2emission %>%
+  filter(between(Year, 1913, 2012)) %>%
+  filter(Entity %in% c('China'))
+
+Avgco2India <- co2emission %>%
+  filter(between(Year, 1913, 2012)) %>%
+  filter(Entity %in% c('India'))
+
 ```
 
+# Research Question 1 
+## Correlation Analysis
+
+To answer the first research question, the researchers conducted correlation analysis between CO2 emission and land temperature in the following locations: Estonia, Thailand, Africa, Australia, United States, China, and India. 
 
 ```{r Library, include=FALSE}
 library("ggpubr")
 ```
 
-Here I have run a preliminary correlation test, however I don't think that makes too much sense. However perhaps I just cannot read it properly at the moment. 
+Here I have run a preliminary correlation test on all countries together, however I don't think that makes too much sense. However perhaps I just cannot read it properly at the moment. 
 
-```{r}
-cor.test(AvgTempRevised$AverageTemperature,Avgco2$`Annual CO2 emissions`, method = c("pearson", "kendall", "spearman"))
-TaskFrame <- data.frame(AvgTempRevised$AverageTemperature,Avgco2$`Annual CO2 emissions`)
-TaskFrame
-
-ggscatter(TaskFrame, x="AvgTempRevised.AverageTemperature", y="Avgco2..Annual.CO2.emissions.",
-          add="reg.line", conf.int=TRUE,
-          cor.coef = TRUE, cor.method = "pearson",
-          xlab = "Average Temperatures", ylab = "Co2 Emissions")
+```{r All Countries}
+cor.test(AvgTemp$AverageTemperature, Avgco2$`Annual CO2 emissions`, method = c("pearson", "kendall", "spearman"))
 
 ```
+
+```{r Estonia}
+
+cor.test(AvgTempEstonia$AverageTemperature, Avgco2Estonia$`Annual CO2 emissions`, method = c("pearson", "kendall", "spearman"))
+```
+
+```{r Thailand}
+
+cor.test(AvgTempThailand$AverageTemperature, Avgco2Thailand$`Annual CO2 emissions`, method = c("pearson", "kendall", "spearman"))
+```
+
+```{r Africa}
+
+cor.test(AvgTempAfrica$AverageTemperature, Avgco2Africa$`Annual CO2 emissions`, method = c("pearson", "kendall", "spearman"))
+
+```
+
+```{r Australia}
+
+cor.test(AvgTempAustralia$AverageTemperature, Avgco2Australia$`Annual CO2 emissions`, method = c("pearson", "kendall", "spearman"))
+
+```
+
+```{r United States}
+
+cor.test(AvgTempUS$AverageTemperature, Avgco2US$`Annual CO2 emissions`, method = c("pearson", "kendall", "spearman"))
+
+```
+
+```{r China}
+
+cor.test(AvgTempChina$AverageTemperature, Avgco2China$`Annual CO2 emissions`, method = c("pearson", "kendall", "spearman"))
+
+```
+
+```{r India}
+
+cor.test(AvgTempIndia$AverageTemperature, Avgco2India$`Annual CO2 emissions`, method = c("pearson", "kendall", "spearman"))
+
+```
+
+## Results
+
+For this report, the researchers have decided to look at the CO2 emissions and land temperatures of Estonia, Thailand, Africa, Australia, United states, China and India. All of these locations have a positive correlation between CO2 emissions and land temperatures, however some places with a higher coefficient than others. 
+
+Estonia is the only country which seems to have no significant (p=0.21) result for the correlation and also with a smaller coefficient (r(98)=.13) than other places. All other locations had highly significant (p<.0001) correlation results. Africa showed the highest CO2 emission and land temperature correlation with a result of r(98)=0.80. After Africa, in descending order, there is Australia (r(98)=0.69), China (r(98)=0.68), India (r(98)=0.66), Thailand (r(98)=0.55), and United States (r(98)=0.47). 
 
 
 # RQ2
@@ -229,3 +286,5 @@ predictedAverageTemperature %>%
     geom_line() +
     labs(title = 'Annual average temperature from 1913 - 2012 using linear regression model')
 ```
+
+# Discussion
