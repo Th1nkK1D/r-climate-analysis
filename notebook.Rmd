@@ -46,7 +46,38 @@ temperature <- read_csv('GlobalLandTemperatures_GlobalLandTemperaturesByCountry.
 glimpse(temperature)
 ```
 
-Need to explain more about each columns
+The Country have 243 unique values but it also include continent including Africa, Antarctica, Asia, Europe, North America, Oceania, South America.
+
+```{r}
+unique(temperature$Country)
+```
+Interestingly, there are some country which represented in 2 different values: Denmark (Europe) - Denmark, France (Europe) - France, Netherlands (Europe), Netherlands, and United Kingdom (Europe) - United Kingdom.
+
+```{r}
+temperature %>%
+  filter(Country %in% c('Denmark (Europe)', 'Denmark')) %>%
+  ggplot(aes(x=dt, y=AverageTemperature, color=Country)) +
+    geom_line() +
+    labs(title = 'Denmark temperature')
+
+temperature %>%
+  filter(Country %in% c('France (Europe)', 'France')) %>%
+  ggplot(aes(x=dt, y=AverageTemperature, color=Country)) +
+    geom_line() +
+    labs(title = 'France temperature')
+
+temperature %>%
+  filter(Country %in% c('Netherlands (Europe)', 'Netherlands')) %>%
+  ggplot(aes(x=dt, y=AverageTemperature, color=Country)) +
+    geom_line() +
+    labs(title = 'Netherlands temperature')
+
+temperature %>%
+  filter(Country %in% c('United Kingdom (Europe)', 'United Kingdom')) %>%
+  ggplot(aes(x=dt, y=AverageTemperature, color=Country)) +
+    geom_line() +
+    labs(title = 'United Kingdom temperature')
+```
 
 Check the datetime column. The newest record is in 2013-09-01. The dataset contains record of every 1st of the month.
 
@@ -57,7 +88,7 @@ sort(unique(temperature$dt), decreasing = TRUE)[1:10]
 ```{r}
 temperature %>%
   filter(between(dt, as.Date('2002-01-01'), as.Date('2012-12-31'))) %>%
-  filter(Country %in% c('Estonia', 'Thailand', 'Africa', 'Australia', 'United States', 'China', 'India')) %>%
+  filter(Country %in% c('Estonia', 'Thailand', 'South Africa', 'Australia', 'United States', 'China', 'India')) %>%
   ggplot(aes(x=dt, y=AverageTemperature, color=Country)) +
     geom_line() +
     labs(title = 'Monthly average temperature from 2002-2012')
@@ -73,7 +104,16 @@ co2emission <- read_csv('annual-co2-emissions-per-country.csv', show_col_types =
 glimpse(co2emission)
 ```
 
-Need to explain more about each columns
+The Entity have 247 unique values including countries but also
+- Continents: Africa, Antarctica, Asia, Europe, North America, Oceania, South America
+- Continents with exception: Asia (excl. China and India), Europe (excl. EU-27), Europe (excl. EU-28), European Union (27), European Union (28), North America (excl. USA)
+- Country with income group: Low-income countries, High-income countries, Upper-middle-income countries etc.
+- GCP areas: French Equatorial Africa (GCP), French West Africa (GCP), etc.
+- Not a country: International transport
+
+```{r}
+unique(co2emission$Entity)
+```
 
 Check the year column. The dataset contain annual data. The newest record is in 2021
 
@@ -84,6 +124,18 @@ sort(unique(co2emission$Year), decreasing = TRUE)[1:10]
 # 3. Data cleaning and transformation
 
 ## 3.1 Annual temperature by country
+
+Remove rows with continent or redundant Europe record in Country column. Now we have 232 uniqe values.
+
+```{r}
+temperature <- temperature %>%
+  filter(
+    !Country %in% c('Africa', 'Antarctica', 'Asia', 'Europe', 'North America', 'Oceania', 'South America'),
+    !grepl("(Europe)", Country)
+    ) 
+
+unique(temperature$Country)
+```
 
 Calculate annual average temperature from 1913 - 2012 and drop NAs row
 
@@ -101,7 +153,7 @@ annualTemperature
 
 ```{r}
 annualTemperature %>%
-  filter(Country %in% c('Estonia', 'Thailand', 'Africa', 'Australia', 'United States', 'China', 'India')) %>%
+  filter(Country %in% c('Estonia', 'Thailand', 'South Africa', 'Australia', 'United States', 'China', 'India')) %>%
   ggplot(aes(x=Year, y=AverageTemperature, color=Country)) +
     geom_point(size = 0.8, alpha = 0.3) +
     geom_smooth(method='lm') +
@@ -110,7 +162,7 @@ annualTemperature %>%
 
 ```{r Temperature Per Country}
 AvgTemp <- annualTemperature %>%
-  filter(Country %in% c('Estonia', 'Thailand', 'Africa', 'Australia', 'United States', 'China', 'India'))
+  filter(Country %in% c('Estonia', 'Thailand', 'South Africa', 'Australia', 'United States', 'China', 'India'))
 
 AvgTempEstonia <- annualTemperature %>%
   filter(Country %in% c('Estonia'))
@@ -136,10 +188,25 @@ AvgTempIndia <- annualTemperature %>%
 
 ## 3.2 Co2 emission by country
 
-Filter only record from 1913-2012
+Remove rows with invalid country in Entity column. Now we have 221 unique values.
 
 ```{r}
 selectedCo2Emission <- co2emission %>%
+  filter(
+    !Entity %in% c('Africa', 'Antarctica', 'Asia', 'Europe', 'North America', 'Oceania', 'South America', 'Sint Maarten (Dutch part)', 'International transport'),
+    !grepl("European Union", Entity),
+    !grepl("excl.", Entity),
+    !grepl("income", Entity),
+    !grepl("(GCP)", Entity),
+    ) 
+
+unique(selectedCo2Emission$Entity)
+```
+
+Filter only record from 1913-2012
+
+```{r}
+selectedCo2Emission <- selectedCo2Emission %>%
   filter(between(Year, 1913, 2012))
 
 selectedCo2Emission
@@ -147,7 +214,7 @@ selectedCo2Emission
 
 ```{r}
 selectedCo2Emission %>%
-  filter(Entity %in% c('Estonia', 'Thailand', 'Africa', 'Australia', 'United States', 'China', 'India')) %>%
+  filter(Entity %in% c('Estonia', 'Thailand', 'South Africa', 'Australia', 'United States', 'China', 'India')) %>%
   ggplot(aes(x=Year, y=`Annual CO2 emissions`, color=Entity)) +
     geom_line() +
     labs(title = 'Annual CO2 emissions from 1913-2012')
@@ -271,7 +338,7 @@ predictedAverageTemperature
 
 ```{r}
 predictedAverageTemperature %>%
-  filter(Country %in% c('Estonia', 'Thailand', 'Africa', 'Australia', 'United States', 'China', 'India')) %>%
+  filter(Country %in% c('Estonia', 'Thailand', 'South Africa', 'Australia', 'United States', 'China', 'India')) %>%
   ggplot(aes(x=Year, y=AverageTemperature, color=Country)) +
     geom_line() +
     labs(title = 'Annual average temperature from 1913 - 2012 using linear regression model')
