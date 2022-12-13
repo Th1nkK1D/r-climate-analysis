@@ -343,5 +343,88 @@ predictedAverageTemperature %>%
     geom_line() +
     labs(title = 'Annual average temperature from 1913 - 2012 using linear regression model')
 ```
+Find temperature change from 1913 - 2012 of each country
+
+```{r}
+estimatedTemperatureChange <- predictedAverageTemperature %>%
+  pivot_wider(names_from = Year, values_from = AverageTemperature) %>%
+  mutate(`Temperature change` = `2012` - `1913`) %>%
+  select(Country, `Temperature change`)
+
+estimatedTemperatureChange
+```
+```{r}
+summary(estimatedTemperatureChange$`Temperature change`)
+```
+
+```{r}
+ggplot(estimatedTemperatureChange, aes(x = `Temperature change`)) +
+  geom_histogram(bins = 30) +
+  labs(title = 'Distribution of estimated temperature change in each country from 1913 - 2012')
+```
+
+Find total CO2 emission from 1913 - 2012 of each country
+
+```{r}
+totalCo2Emission <- selectedCo2Emission %>%
+  rename(Country = Entity) %>%
+  group_by(Country) %>%
+  summarise(`Total CO2 emissions` = sum(`Annual CO2 emissions`)) %>%
+  mutate(`CO2 emissions (MT)` = `Total CO2 emissions` / 1000000) %>%
+  select(-`Total CO2 emissions`)
+
+totalCo2Emission
+```
+
+```{r}
+summary(totalCo2Emission$`CO2 emissions (MT)`)
+```
+
+```{r}
+ggplot(totalCo2Emission, aes(x = `CO2 emissions (MT)`)) +
+  geom_histogram(bins = 30) +
+  labs(title = 'Distribution of estimated temperature change in each country from 1913 - 2012')
+```
+
+Combine estimated temperature changes and CO2 emission for each country from 1913 - 2012
+
+```{r}
+countryTemperatureChangeAndEmission <- 
+  inner_join(estimatedTemperatureChange, totalCo2Emission, by = 'Country') %>%
+  mutate(
+    Ratio = `Temperature change` / `CO2 emissions (MT)`,
+    `CO2 emissions (Quartile)` = cut(`CO2 emissions (MT)`, quantile(`CO2 emissions (MT)`), include.lowest=TRUE, labels=FALSE),
+    `Temperature Change (Quartile)` = cut(`Temperature change`, quantile(`Temperature change`), include.lowest=TRUE, labels=FALSE),
+  ) %>%
+  unite(Group, 'CO2 emissions (Quartile)', 'Temperature Change (Quartile)') %>%
+  mutate(Group = ifelse(Group == '4_1', 'Evil emitter', ifelse(Group == '1_4', 'Unlucky receiver', 'Neutral')))
+
+countryTemperatureChangeAndEmission
+```
+
+```{r}
+ggplot(countryTemperatureChangeAndEmission, aes(x = Group)) +
+  geom_bar()
+```
+
+```{r}
+ggplot(countryTemperatureChangeAndEmission,
+       aes(x = `CO2 emissions (MT)`, y = `Temperature change`, label = Country, color = Group)
+       ) +
+  geom_point(alpha = 0.8) +
+  geom_text(vjust = 1.4, size = 3, alpha = 0.6) +
+  geom_vline(xintercept = mean(countryTemperatureChangeAndEmission$`CO2 emissions (MT)`)) +
+  geom_hline(yintercept = mean(countryTemperatureChangeAndEmission$`Temperature change`))
+```
+
+```{r}
+countryTemperatureChangeAndEmission %>%
+  filter(Group != 'Neutral') %>%
+ggplot(aes(x = `CO2 emissions (MT)`, y = `Temperature change`, label = Country, color = Group)) +
+  geom_point(alpha = 0.8) +
+  geom_text(vjust = 1.4, size = 3, alpha = 0.6) +
+  geom_vline(xintercept = mean(countryTemperatureChangeAndEmission$`CO2 emissions (MT)`)) +
+  geom_hline(yintercept = mean(countryTemperatureChangeAndEmission$`Temperature change`))
+```
 
 # Discussion
