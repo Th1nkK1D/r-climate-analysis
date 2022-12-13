@@ -11,6 +11,7 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 
 library(tidyverse)
+library(ggpubr)
 ```
 
 # 1. Introduction
@@ -138,13 +139,14 @@ AvgTempIndia <- annualTemperature %>%
 Filter only record from 1913-2012
 
 ```{r}
-co2emission %>%
+selectedCo2Emission <- co2emission %>%
   filter(between(Year, 1913, 2012))
+
+selectedCo2Emission
 ```
 
 ```{r}
-co2emission %>%
-  filter(between(Year, 1913, 2012)) %>%
+selectedCo2Emission %>%
   filter(Entity %in% c('Estonia', 'Thailand', 'Africa', 'Australia', 'United States', 'China', 'India')) %>%
   ggplot(aes(x=Year, y=`Annual CO2 emissions`, color=Entity)) +
     geom_line() +
@@ -153,36 +155,28 @@ co2emission %>%
 
 ```{r Co2 Per Country}
 
-Avgco2 <- co2emission %>%
-  filter(between(Year, 1913, 2012)) %>%
+Avgco2 <- selectedCo2Emission %>%
   filter(Entity %in% c('Estonia', 'Thailand', 'Africa', 'Australia', 'United States', 'China', 'India'))
 
-Avgco2Estonia <- co2emission %>%
-  filter(between(Year, 1913, 2012)) %>%
+Avgco2Estonia <- selectedCo2Emission %>%
   filter(Entity %in% c('Estonia'))
 
-Avgco2Thailand <- co2emission %>%
-  filter(between(Year, 1913, 2012)) %>%
+Avgco2Thailand <- selectedCo2Emission %>%
   filter(Entity %in% c('Thailand'))
 
-Avgco2Africa <- co2emission %>%
-  filter(between(Year, 1913, 2012)) %>%
+Avgco2Africa <- selectedCo2Emission %>%
   filter(Entity %in% c('Africa'))
 
-Avgco2Australia <- co2emission %>%
-  filter(between(Year, 1913, 2012)) %>%
+Avgco2Australia <- selectedCo2Emission %>%
   filter(Entity %in% c('Australia'))
 
-Avgco2US <- co2emission %>%
-  filter(between(Year, 1913, 2012)) %>%
+Avgco2US <- selectedCo2Emission %>%
   filter(Entity %in% c('United States'))
 
-Avgco2China <- co2emission %>%
-  filter(between(Year, 1913, 2012)) %>%
+Avgco2China <- selectedCo2Emission %>%
   filter(Entity %in% c('China'))
 
-Avgco2India <- co2emission %>%
-  filter(between(Year, 1913, 2012)) %>%
+Avgco2India <- selectedCo2Emission %>%
   filter(Entity %in% c('India'))
 
 ```
@@ -191,10 +185,6 @@ Avgco2India <- co2emission %>%
 ## Correlation Analysis
 
 To answer the first research question, the researchers conducted correlation analysis between CO2 emission and land temperature in the following locations: Estonia, Thailand, Africa, Australia, United States, China, and India. 
-
-```{r Library, include=FALSE}
-library("ggpubr")
-```
 
 Here I have run a preliminary correlation test on all countries together, however I don't think that makes too much sense. However perhaps I just cannot read it properly at the moment. 
 
