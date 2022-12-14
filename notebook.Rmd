@@ -47,7 +47,7 @@ temperature <- read_csv('GlobalLandTemperatures_GlobalLandTemperaturesByCountry.
 glimpse(temperature)
 ```
 
-The `Country` is a categorical data. have 243 unique values but it also include continent including Africa, Antarctica, Asia, Europe, North America, Oceania, South America.
+The `Country` is a categorical data and has 243 unique values, but it also includes continents: Africa, Antarctica, Asia, Europe, North America, Oceania, South America.
 
 ```{r}
 unique(temperature$Country)
@@ -174,8 +174,8 @@ AvgTempEstonia <- annualTemperature %>%
 AvgTempThailand <- annualTemperature %>%
   filter(Country %in% c('Thailand'))
 
-AvgTempAfrica <- annualTemperature %>%
-  filter(Country %in% c('Africa'))
+AvgTempSouthAfrica <- annualTemperature %>%
+  filter(Country %in% c('South Africa'))
 
 AvgTempAustralia <- annualTemperature %>%
   filter(Country %in% c('Australia'))
@@ -227,7 +227,7 @@ selectedCo2Emission %>%
 ```{r Co2 Per Country}
 
 Avgco2 <- selectedCo2Emission %>%
-  filter(Entity %in% c('Estonia', 'Thailand', 'Africa', 'Australia', 'United States', 'China', 'India'))
+  filter(Entity %in% c('Estonia', 'Thailand', 'South Africa', 'Australia', 'United States', 'China', 'India'))
 
 Avgco2Estonia <- selectedCo2Emission %>%
   filter(Entity %in% c('Estonia'))
@@ -235,8 +235,8 @@ Avgco2Estonia <- selectedCo2Emission %>%
 Avgco2Thailand <- selectedCo2Emission %>%
   filter(Entity %in% c('Thailand'))
 
-Avgco2Africa <- selectedCo2Emission %>%
-  filter(Entity %in% c('Africa'))
+Avgco2SouthAfrica <- selectedCo2Emission %>%
+  filter(Entity %in% c('South Africa'))
 
 Avgco2Australia <- selectedCo2Emission %>%
   filter(Entity %in% c('Australia'))
@@ -255,13 +255,10 @@ Avgco2India <- selectedCo2Emission %>%
 # Research Question 1 
 ## Correlation Analysis
 
-To answer the first research question, the researchers conducted correlation analysis between CO2 emission and land temperature in the following locations: Estonia, Thailand, Africa, Australia, United States, China, and India. 
+To answer the first research question, the researchers conducted correlation analysis between CO2 emission and land temperature in the following locations: Estonia, Thailand, South Africa, Australia, United States, China, and India. 
 
-Here I have run a preliminary correlation test on all countries together, however I don't think that makes too much sense. However perhaps I just cannot read it properly at the moment. 
-
-```{r All Countries}
-cor.test(AvgTemp$AverageTemperature, Avgco2$`Annual CO2 emissions`, method = c("pearson", "kendall", "spearman"))
-
+```{r library, include=FALSE}
+library("ggpubr")
 ```
 
 ```{r Estonia}
@@ -269,21 +266,57 @@ cor.test(AvgTemp$AverageTemperature, Avgco2$`Annual CO2 emissions`, method = c("
 cor.test(AvgTempEstonia$AverageTemperature, Avgco2Estonia$`Annual CO2 emissions`, method = c("pearson", "kendall", "spearman"))
 ```
 
+```{r, include=FALSE}
+
+EstFrame <- data.frame(AvgTempEstonia$AverageTemperature, Avgco2Estonia$`Annual CO2 emissions`)  
+ggscatter(EstFrame, x = "AvgTempEstonia.AverageTemperature", y = "Avgco2Estonia..Annual.CO2.emissions.", add = "reg.line", conf.int = TRUE, 
+             cor.coef = TRUE, cor.method = "pearson",
+             xlab = "Temperature", ylab = "CO2", title = "Estonia")
+```
+
 ```{r Thailand}
 
 cor.test(AvgTempThailand$AverageTemperature, Avgco2Thailand$`Annual CO2 emissions`, method = c("pearson", "kendall", "spearman"))
 ```
 
-```{r Africa}
+```{r, include = FALSE}
 
-cor.test(AvgTempAfrica$AverageTemperature, Avgco2Africa$`Annual CO2 emissions`, method = c("pearson", "kendall", "spearman"))
+ThaiFrame <- data.frame(AvgTempThailand$AverageTemperature, Avgco2Thailand$`Annual CO2 emissions`)  
+
+ggscatter(ThaiFrame, x = "AvgTempThailand.AverageTemperature", y = "Avgco2Thailand..Annual.CO2.emissions.", add = "reg.line", conf.int = TRUE, 
+             cor.coef = TRUE, cor.method = "pearson",
+             xlab = "Temperature", ylab = "CO2", title = "Thailand")
+             
 
 ```
+
+```{r South Africa}
+
+cor.test(AvgTempSouthAfrica$AverageTemperature, Avgco2Africa$`Annual CO2 emissions`, method = c("pearson", "kendall", "spearman"))
+
+```
+
+```{r, include = FALSE}
+
+SouthFrame <- data.frame(AvgTempSouthAfrica$AverageTemperature, Avgco2SouthAfrica$`Annual CO2 emissions`)
+ggscatter(SouthFrame, x = "AvgTempSouthAfrica.AverageTemperature", y = "Avgco2SouthAfrica..Annual.CO2.emissions.", add = "reg.line", conf.int = TRUE, 
+             cor.coef = TRUE, cor.method = "pearson",
+             xlab = "Temperature", ylab = "CO2", title = "South Africa")
+```
+
 
 ```{r Australia}
 
 cor.test(AvgTempAustralia$AverageTemperature, Avgco2Australia$`Annual CO2 emissions`, method = c("pearson", "kendall", "spearman"))
 
+```
+
+```{r, include = FALSE}
+
+AusFrame <- data.frame(AvgTempAustralia$AverageTemperature, Avgco2Australia$`Annual CO2 emissions`)
+ggscatter(AusFrame, x = "AvgTempAustralia.AverageTemperature", y = "Avgco2Australia..Annual.CO2.emissions.", add = "reg.line", conf.int = TRUE, 
+             cor.coef = TRUE, cor.method = "pearson",
+             xlab = "Temperature", ylab = "CO2", title = "Australia")
 ```
 
 ```{r United States}
@@ -292,10 +325,26 @@ cor.test(AvgTempUS$AverageTemperature, Avgco2US$`Annual CO2 emissions`, method =
 
 ```
 
+```{r, include = FALSE}
+
+USFrame <- data.frame(AvgTempUS$AverageTemperature, Avgco2US$`Annual CO2 emissions`)
+ggscatter(USFrame, x = "AvgTempUS.AverageTemperature", y = "Avgco2US..Annual.CO2.emissions.", add = "reg.line", conf.int = TRUE, 
+             cor.coef = TRUE, cor.method = "pearson",
+             xlab = "Temperature", ylab = "CO2", title = "United States")
+```
+
 ```{r China}
 
 cor.test(AvgTempChina$AverageTemperature, Avgco2China$`Annual CO2 emissions`, method = c("pearson", "kendall", "spearman"))
 
+```
+
+```{r, include = FALSE}
+
+ChinaFrame <- data.frame(AvgTempChina$AverageTemperature, Avgco2China$`Annual CO2 emissions`)
+ggscatter(ChinaFrame, x = "AvgTempChina.AverageTemperature", y = "Avgco2China..Annual.CO2.emissions.", add = "reg.line", conf.int = TRUE, 
+             cor.coef = TRUE, cor.method = "pearson",
+             xlab = "Temperature", ylab = "CO2", title = "China")
 ```
 
 ```{r India}
@@ -304,11 +353,19 @@ cor.test(AvgTempIndia$AverageTemperature, Avgco2India$`Annual CO2 emissions`, me
 
 ```
 
+```{r, include = FALSE}
+
+IndiaFrame <- data.frame(AvgTempIndia$AverageTemperature, Avgco2India$`Annual CO2 emissions`)
+ggscatter(IndiaFrame, x = "AvgTempIndia.AverageTemperature", y = "Avgco2India..Annual.CO2.emissions.", add = "reg.line", conf.int = TRUE, 
+             cor.coef = TRUE, cor.method = "pearson",
+             xlab = "Temperature", ylab = "CO2", title = "India")
+```
+
 ## Results
 
-For this report, the researchers have decided to look at the CO2 emissions and land temperatures of Estonia, Thailand, Africa, Australia, United states, China and India. All of these locations have a positive correlation between CO2 emissions and land temperatures, however some places with a higher coefficient than others. 
+For this report, the researchers have decided to look at the CO2 emissions and land temperatures of Estonia, Thailand, South Africa, Australia, United states, China and India. All of these countries have a positive correlation between CO2 emissions and land temperatures, however some places with a higher coefficient than others. 
 
-Estonia is the only country which seems to have no significant (p=0.21) result for the correlation and also with a smaller coefficient (r(98)=.13) than other places. All other locations had highly significant (p<.0001) correlation results. Africa showed the highest CO2 emission and land temperature correlation with a result of r(98)=0.80. After Africa, in descending order, there is Australia (r(98)=0.69), China (r(98)=0.68), India (r(98)=0.66), Thailand (r(98)=0.55), and United States (r(98)=0.47). 
+Estonia is the only country which seems to have no significant (p=0.21) result for the correlation and also with a smaller coefficient (r(98)=.13) than other places. All other locations had highly significant (p<.0001) correlation results. Australia showed the highest CO2 emission and land temperature correlation with a result of r(98)=0.69. After Australia, in descending order, there is China (r(98)=0.68), India (r(98)=0.66), South Africa (r(98)=0.66), Thailand (r(98)=0.55), and United States (r(98)=0.47). 
 
 
 # Research Questions 2: The evil emitters and unlucky receivers
