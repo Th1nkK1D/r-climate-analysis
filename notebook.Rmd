@@ -47,44 +47,31 @@ temperature <- read_csv('GlobalLandTemperatures_GlobalLandTemperaturesByCountry.
 glimpse(temperature)
 ```
 
-The Country have 243 unique values but it also include continent including Africa, Antarctica, Asia, Europe, North America, Oceania, South America.
+The `Country` is a categorical data. have 243 unique values but it also include continent including Africa, Antarctica, Asia, Europe, North America, Oceania, South America.
 
 ```{r}
 unique(temperature$Country)
 ```
-Interestingly, there are some country which represented in 2 different values: Denmark (Europe) - Denmark, France (Europe) - France, Netherlands (Europe), Netherlands, and United Kingdom (Europe) - United Kingdom.
+Interestingly, there are some country which represented in 2 different values: Denmark (Europe) - Denmark, France (Europe) - France, Netherlands (Europe), Netherlands, and United Kingdom (Europe) - United Kingdom. Most of them are almost the same except Denmark.
 
 ```{r}
 temperature %>%
-  filter(Country %in% c('Denmark (Europe)', 'Denmark')) %>%
+  filter(Country %in% c('Denmark (Europe)', 'Denmark', 'France (Europe)', 'France', 'Netherlands (Europe)', 'Netherlands', 'United Kingdom (Europe)', 'United Kingdom')) %>%
+  mutate(Group = gsub(" \\(Europe\\)", "", Country)) %>%
+  drop_na() %>%
   ggplot(aes(x=dt, y=AverageTemperature, color=Country)) +
-    geom_line() +
-    labs(title = 'Denmark temperature')
-
-temperature %>%
-  filter(Country %in% c('France (Europe)', 'France')) %>%
-  ggplot(aes(x=dt, y=AverageTemperature, color=Country)) +
-    geom_line() +
-    labs(title = 'France temperature')
-
-temperature %>%
-  filter(Country %in% c('Netherlands (Europe)', 'Netherlands')) %>%
-  ggplot(aes(x=dt, y=AverageTemperature, color=Country)) +
-    geom_line() +
-    labs(title = 'Netherlands temperature')
-
-temperature %>%
-  filter(Country %in% c('United Kingdom (Europe)', 'United Kingdom')) %>%
-  ggplot(aes(x=dt, y=AverageTemperature, color=Country)) +
-    geom_line() +
-    labs(title = 'United Kingdom temperature')
+    geom_line(alpha = 0.5) +
+    facet_wrap(~ Group) +
+    labs(title = 'Redundant EU country temperature')
 ```
 
-Check the datetime column. The newest record is in 2013-09-01. The dataset contains record of every 1st of the month.
+The `dt` is a discrete numerical data representing date. The dataset contains record of every 1st of the month. and here are the latest 10 record dates:
 
 ```{r}
 sort(unique(temperature$dt), decreasing = TRUE)[1:10]
 ```
+
+The `AverageTemperature` is a continues numerical data representing country's land temperature in each month. The value is swinging up and down in pattern according to the seasons. 
 
 ```{r}
 temperature %>%
@@ -94,6 +81,13 @@ temperature %>%
     geom_line() +
     labs(title = 'Monthly average temperature from 2002-2012')
 ```
+We can see that `AverageTemperature` contains a lot of NA's because only some country data is available in the early years.
+
+```{r}
+summary(temperature$AverageTemperature)
+```
+
+The `AverageTemperatureUncertainty` is also given but we are not going to use it.
 
 
 ## 2.2 Global CO2 emission by country
@@ -105,7 +99,7 @@ co2emission <- read_csv('annual-co2-emissions-per-country.csv', show_col_types =
 glimpse(co2emission)
 ```
 
-The Entity have 247 unique values including countries but also
+The `Entity` is categorical data with 247 unique values including countries but also
 - Continents: Africa, Antarctica, Asia, Europe, North America, Oceania, South America
 - Continents with exception: Asia (excl. China and India), Europe (excl. EU-27), Europe (excl. EU-28), European Union (27), European Union (28), North America (excl. USA)
 - Country with income group: Low-income countries, High-income countries, Upper-middle-income countries etc.
@@ -116,11 +110,20 @@ The Entity have 247 unique values including countries but also
 unique(co2emission$Entity)
 ```
 
-Check the year column. The dataset contain annual data. The newest record is in 2021
+`Year` column is a discrete numerical data. The dataset contain annual data. Here are the 10 latest record year:
 
 ```{r}
 sort(unique(co2emission$Year), decreasing = TRUE)[1:10]
 ```
+
+`Annual CO2 emissions` is a continueus numerical data representing CO2 emission in tons. There is no NA's but range from 0 to 3.712e+10.
+
+```{r}
+summary(co2emission$`Annual CO2 emissions`)
+```
+
+`Code` representing country code, but we don't have any plan to use it.
+
 
 # 3. Data cleaning and transformation
 
