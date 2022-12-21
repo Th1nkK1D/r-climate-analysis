@@ -1,0 +1,24 @@
+name: Render and publish rmarkdown
+
+on: [push]
+
+permissions:
+  contents: write
+  
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Git repository
+        uses: actions/checkout@v2
+      - name: Render HTML document
+        uses: lc5415/rmarkdown-action@v1
+        with:
+          input_file: notebook.Rmd
+          output_format: html_document
+      - name: Prepare output
+        run: mkdir dist && mv notebook.html dist/index.html
+      - name: Deploy to Github Page
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist
