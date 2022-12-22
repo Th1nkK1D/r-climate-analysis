@@ -292,7 +292,7 @@ ggscatter(ThaiFrame, x = "AvgTempThailand.AverageTemperature", y = "Avgco2Thaila
 
 ```{r South Africa}
 
-cor.test(AvgTempSouthAfrica$AverageTemperature, Avgco2Africa$`Annual CO2 emissions`, method = c("pearson", "kendall", "spearman"))
+cor.test(AvgTempSouthAfrica$AverageTemperature, Avgco2SouthAfrica$`Annual CO2 emissions`, method = c("pearson", "kendall", "spearman"))
 
 ```
 
