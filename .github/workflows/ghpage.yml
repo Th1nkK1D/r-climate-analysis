@@ -24,7 +24,7 @@ jobs:
       - name: Install dependency packages
         uses: r-lib/actions/setup-renv@v2
       - name: Render HTML output
-        run: Rscript -e 'rmarkdown::render("notebook.Rmd", output_dir="dist", output_file="index")'
+        run: Rscript -e 'rmarkdown::render("src/notebook.Rmd", output_dir="dist", output_file="index")'
       - name: Deploy to Github Page
         uses: JamesIves/github-pages-deploy-action@v4
         with:
