@@ -261,12 +261,12 @@ To answer the first research question, the researchers conducted correlation ana
 library("ggpubr")
 ```
 
-```{r Estonia}
+```{r Estonia, include = FALSE}
 
 cor.test(AvgTempEstonia$AverageTemperature, Avgco2Estonia$`Annual CO2 emissions`, method = c("pearson", "kendall", "spearman"))
 ```
 
-```{r, include=FALSE}
+```{r}
 
 EstFrame <- data.frame(AvgTempEstonia$AverageTemperature, Avgco2Estonia$`Annual CO2 emissions`)  
 ggscatter(EstFrame, x = "AvgTempEstonia.AverageTemperature", y = "Avgco2Estonia..Annual.CO2.emissions.", add = "reg.line", conf.int = TRUE, 
@@ -274,12 +274,12 @@ ggscatter(EstFrame, x = "AvgTempEstonia.AverageTemperature", y = "Avgco2Estonia.
              xlab = "Temperature", ylab = "CO2", title = "Estonia")
 ```
 
-```{r Thailand}
+```{r Thailand, include = FALSE}
 
 cor.test(AvgTempThailand$AverageTemperature, Avgco2Thailand$`Annual CO2 emissions`, method = c("pearson", "kendall", "spearman"))
 ```
 
-```{r, include = FALSE}
+```{r}
 
 ThaiFrame <- data.frame(AvgTempThailand$AverageTemperature, Avgco2Thailand$`Annual CO2 emissions`)  
 
@@ -290,13 +290,13 @@ ggscatter(ThaiFrame, x = "AvgTempThailand.AverageTemperature", y = "Avgco2Thaila
 
 ```
 
-```{r South Africa}
+```{r South Africa, include = FALSE}
 
 cor.test(AvgTempSouthAfrica$AverageTemperature, Avgco2SouthAfrica$`Annual CO2 emissions`, method = c("pearson", "kendall", "spearman"))
 
 ```
 
-```{r, include = FALSE}
+```{r}
 
 SouthFrame <- data.frame(AvgTempSouthAfrica$AverageTemperature, Avgco2SouthAfrica$`Annual CO2 emissions`)
 ggscatter(SouthFrame, x = "AvgTempSouthAfrica.AverageTemperature", y = "Avgco2SouthAfrica..Annual.CO2.emissions.", add = "reg.line", conf.int = TRUE, 
@@ -305,13 +305,13 @@ ggscatter(SouthFrame, x = "AvgTempSouthAfrica.AverageTemperature", y = "Avgco2So
 ```
 
 
-```{r Australia}
+```{r Australia, include = FALSE}
 
 cor.test(AvgTempAustralia$AverageTemperature, Avgco2Australia$`Annual CO2 emissions`, method = c("pearson", "kendall", "spearman"))
 
 ```
 
-```{r, include = FALSE}
+```{r}
 
 AusFrame <- data.frame(AvgTempAustralia$AverageTemperature, Avgco2Australia$`Annual CO2 emissions`)
 ggscatter(AusFrame, x = "AvgTempAustralia.AverageTemperature", y = "Avgco2Australia..Annual.CO2.emissions.", add = "reg.line", conf.int = TRUE, 
@@ -319,13 +319,13 @@ ggscatter(AusFrame, x = "AvgTempAustralia.AverageTemperature", y = "Avgco2Austra
              xlab = "Temperature", ylab = "CO2", title = "Australia")
 ```
 
-```{r United States}
+```{r United States, include = FALSE}
 
 cor.test(AvgTempUS$AverageTemperature, Avgco2US$`Annual CO2 emissions`, method = c("pearson", "kendall", "spearman"))
 
 ```
 
-```{r, include = FALSE}
+```{r}
 
 USFrame <- data.frame(AvgTempUS$AverageTemperature, Avgco2US$`Annual CO2 emissions`)
 ggscatter(USFrame, x = "AvgTempUS.AverageTemperature", y = "Avgco2US..Annual.CO2.emissions.", add = "reg.line", conf.int = TRUE, 
@@ -333,13 +333,13 @@ ggscatter(USFrame, x = "AvgTempUS.AverageTemperature", y = "Avgco2US..Annual.CO2
              xlab = "Temperature", ylab = "CO2", title = "United States")
 ```
 
-```{r China}
+```{r China, include = FALSE}
 
 cor.test(AvgTempChina$AverageTemperature, Avgco2China$`Annual CO2 emissions`, method = c("pearson", "kendall", "spearman"))
 
 ```
 
-```{r, include = FALSE}
+```{r}
 
 ChinaFrame <- data.frame(AvgTempChina$AverageTemperature, Avgco2China$`Annual CO2 emissions`)
 ggscatter(ChinaFrame, x = "AvgTempChina.AverageTemperature", y = "Avgco2China..Annual.CO2.emissions.", add = "reg.line", conf.int = TRUE, 
@@ -347,13 +347,13 @@ ggscatter(ChinaFrame, x = "AvgTempChina.AverageTemperature", y = "Avgco2China..A
              xlab = "Temperature", ylab = "CO2", title = "China")
 ```
 
-```{r India}
+```{r India, include = FALSE}
 
 cor.test(AvgTempIndia$AverageTemperature, Avgco2India$`Annual CO2 emissions`, method = c("pearson", "kendall", "spearman"))
 
 ```
 
-```{r, include = FALSE}
+```{r}
 
 IndiaFrame <- data.frame(AvgTempIndia$AverageTemperature, Avgco2India$`Annual CO2 emissions`)
 ggscatter(IndiaFrame, x = "AvgTempIndia.AverageTemperature", y = "Avgco2India..Annual.CO2.emissions.", add = "reg.line", conf.int = TRUE, 
@@ -519,3 +519,5 @@ However, judging CO2 for the whole country might not be fair since smaller count
 
 
 # Discussion
+
+The data cleaning process in this report has given a lot of insight into how the global land temperature has annually been increasing in our chosen countries: Australia, China, Estonia, India, South Africa, Thailand, and United States. Similarly, CO2 emission levels have been increasing in all of the countries, however some countries increasing at rather more drastic increments than others. China, Unites States and India have seen a great rise in CO2 emissions, although United States seems to be doing a better job in attempting to slow down their rise with a sudden drop in emissions in the last decade. 
