@@ -16,7 +16,7 @@ library(ggpubr)
 
 # 1. Introduction
 
-Global warming has been a urgent topic for the current century. There are consistent new regulations and directives which aim to reduce the co2 emissions in hopes of slowing down the increasing of land temperatures. For that purpose, the researchers have decided to analyse two datasets a uncover any relationships which may exist. 
+Climate changes has been a urgent topic for the current century. There are consistent new regulations and directives which aim to reduce the CO2 emissions in hopes of slowing down the increasing of land temperatures. For that purpose, the researchers have decided to analyse two datasets a uncover any relationships which may exist. 
 
 ## 1.1 Research Questions
 
@@ -49,9 +49,6 @@ glimpse(temperature)
 
 The `Country` is a categorical data and has 243 unique values, but it also includes continents: Africa, Antarctica, Asia, Europe, North America, Oceania, South America.
 
-```{r}
-unique(temperature$Country)
-```
 Interestingly, there are some country which represented in 2 different values: Denmark (Europe) - Denmark, France (Europe) - France, Netherlands (Europe), Netherlands, and United Kingdom (Europe) - United Kingdom. Most of them are almost the same except Denmark.
 
 ```{r}
@@ -106,17 +103,13 @@ The `Entity` is categorical data with 247 unique values including countries but 
 - GCP areas: French Equatorial Africa (GCP), French West Africa (GCP), etc.
 - Not a country: International transport
 
-```{r}
-unique(co2emission$Entity)
-```
-
 `Year` column is a discrete numerical data. The dataset contain annual data. Here are the 10 latest record year:
 
 ```{r}
 sort(unique(co2emission$Year), decreasing = TRUE)[1:10]
 ```
 
-`Annual CO2 emissions` is a continueus numerical data representing CO2 emission in tons. There is no NA's but range from 0 to 3.712e+10.
+`Annual CO2 emissions` is a continues numerical data representing CO2 emission in tons. There is no NA's but range from 0 to 3.712e+10.
 
 ```{r}
 summary(co2emission$`Annual CO2 emissions`)
@@ -129,7 +122,7 @@ summary(co2emission$`Annual CO2 emissions`)
 
 ## 3.1 Annual temperature by country
 
-Remove rows with continent or redundant Europe record in Country column. Now we have 232 uniqe values.
+First, we remove row continent and redundant country in `Country` column, as discussed in previous section. Now we have valid 232 unique values of country.
 
 ```{r}
 temperature <- temperature %>%
@@ -137,11 +130,9 @@ temperature <- temperature %>%
     !Country %in% c('Africa', 'Antarctica', 'Asia', 'Europe', 'North America', 'Oceania', 'South America'),
     !grepl("(Europe)", Country)
     ) 
-
-unique(temperature$Country)
 ```
 
-Calculate annual average temperature from 1913 - 2012 and drop NAs row
+Then, we calculate annual average temperature from 1913 - 2012 and drop NAs rows
 
 ```{r}
 annualTemperature <- temperature %>%
@@ -150,7 +141,7 @@ annualTemperature <- temperature %>%
   select(-dt) %>%
   filter(between(Year, 1913, 2012)) %>%
   group_by(Country, Year) %>%
-  summarise(AverageTemperature = mean(AverageTemperature), AverageTemperatureUncertainty = mean(AverageTemperatureUncertainty))
+  summarise(AverageTemperature = mean(AverageTemperature), AverageTemperatureUncertainty = mean(AverageTemperatureUncertainty), .groups = "drop")
 
 annualTemperature
 ```
@@ -160,7 +151,7 @@ annualTemperature %>%
   filter(Country %in% c('Estonia', 'Thailand', 'South Africa', 'Australia', 'United States', 'China', 'India')) %>%
   ggplot(aes(x=Year, y=AverageTemperature, color=Country)) +
     geom_point(size = 0.8, alpha = 0.3) +
-    geom_smooth(method='lm') +
+    geom_smooth(method='lm', formula = y ~ x) +
     labs(title = 'Annual average temperature from 1913 - 2012')
 ```
 
@@ -190,9 +181,9 @@ AvgTempIndia <- annualTemperature %>%
   filter(Country %in% c('India'))
 ```
 
-## 3.2 Co2 emission by country
+## 3.2 CO2 emission by country
 
-Remove rows with invalid country in Entity column. Now we have 221 unique values.
+First, we remove rows with invalid country in Entity column, as discussed in previous section. Now we have 221 unique values of country.
 
 ```{r}
 selectedCo2Emission <- co2emission %>%
@@ -203,11 +194,9 @@ selectedCo2Emission <- co2emission %>%
     !grepl("income", Entity),
     !grepl("(GCP)", Entity),
     ) 
-
-unique(selectedCo2Emission$Entity)
 ```
 
-Filter only record from 1913-2012
+Then we filter only record from 1913-2012
 
 ```{r}
 selectedCo2Emission <- selectedCo2Emission %>%
@@ -252,8 +241,9 @@ Avgco2India <- selectedCo2Emission %>%
 
 ```
 
-# Research Question 1 
-## Correlation Analysis
+# 4. Research Question 1: CO2 emissions and land temperature correlation
+
+## 4.1 Correlation Analysis
 
 To answer the first research question, the researchers conducted correlation analysis between CO2 emission and land temperature in the following locations: Estonia, Thailand, South Africa, Australia, United States, China, and India. 
 
@@ -361,21 +351,23 @@ ggscatter(IndiaFrame, x = "AvgTempIndia.AverageTemperature", y = "Avgco2India..A
              xlab = "Temperature", ylab = "CO2", title = "India")
 ```
 
-## Results
+## 4.2 Results
 
 For this report, the researchers have decided to look at the CO2 emissions and land temperatures of Estonia, Thailand, South Africa, Australia, United states, China and India. All of these countries have a positive correlation between CO2 emissions and land temperatures, however some places with a higher coefficient than others. 
 
 Estonia is the only country which seems to have no significant (p=0.21) result for the correlation and also with a smaller coefficient (r(98)=.13) than other places. All other locations had highly significant (p<.0001) correlation results. Australia showed the highest CO2 emission and land temperature correlation with a result of r(98)=0.69. After Australia, in descending order, there is China (r(98)=0.68), India (r(98)=0.66), South Africa (r(98)=0.66), Thailand (r(98)=0.55), and United States (r(98)=0.47). 
 
 
-# Research Questions 2: The evil emitters and unlucky receivers
+# 5. Research Questions 2: The evil emitters and unlucky receivers
 
 From the EDA, we will revise 2 sub-questions as following:
 
 - RQ 2.1. Which country is the evil emitter, ranking in the highest 25% CO2 emission (Q4) and the lowest 25% land temperature change (Q1) from 1913-2012?
 - RQ 2.2. Which country is the unlucky receivers, ranking in the lowest 25% CO2 emission (Q1) and the highest 25% land temperature change (Q1) from 1913-2012?
 
-Since the annual temperatures were swinging between each each. So I create an estimation of temperature change of each country between 1913 and 2012 using the linear regression model with the land temperature dataset.
+## 5.1 Temperature change estimation with Linear regression
+
+Since the annual temperatures were swinging between each year. We estimation the temperature change of each country between 1913 and 2012 using the linear regression model using the land temperature dataset.
 
 ```{r}
 countryList = unique(annualTemperature$Country)
@@ -419,7 +411,7 @@ estimatedTemperatureChange
 summary(estimatedTemperatureChange$`Temperature change`)
 ```
 
-The distribution is very close to the normal distribution which is unexpected from us.
+The distribution is very close to the normal distribution which is surprising.
 
 ```{r}
 ggplot(estimatedTemperatureChange, aes(x = `Temperature change`)) +
@@ -427,7 +419,10 @@ ggplot(estimatedTemperatureChange, aes(x = `Temperature change`)) +
   labs(title = 'Distribution of estimated temperature change in each country from 1913-2012')
 ```
 
-Then we find total CO2 emission from 1913 - 2012 of each country from CO2 emission dataset.
+
+## 5.2 Total CO2 emission
+
+Next step, we find total CO2 emission from 1913 - 2012 of each country from CO2 emission dataset.
 
 ```{r}
 totalCo2Emission <- selectedCo2Emission %>%
@@ -452,6 +447,8 @@ ggplot(totalCo2Emission, aes(x = `CO2 emissions (MT)`)) +
   labs(title = 'Distribution of total co2 emission by each country from 1913-2012')
 ```
 
+## 5.3 Temperature changes per CO2 emissions
+
 Then we join both tibble, estimated temperature changes and CO2 emission for each country from 1913 - 2012, together with additional columns:
 
 - **Ratio** is the temperature change per CO2 emissions (Million tons)
@@ -472,12 +469,17 @@ countryTemperatureChangeAndEmission
 ```
 
 ```{r}
-ggplot(countryTemperatureChangeAndEmission, aes(x = Group)) +
-  geom_bar() + 
-  labs(title = 'Number of country in each group')
+countryTemperatureChangeAndEmission %>%
+  count(Group) %>%
+  ggplot(aes(x = Group, y = n, label = n)) +
+    geom_bar(stat = 'identity') +
+    geom_label() +
+    labs(title = 'Number of countries in each group')
 ```
 
-Here is the country of each group with temperature changes and CO2 emission of each country from 1913-2012
+## 5.4 Results
+
+Here are the countries from each group with temperature changes and CO2 emission from 1913-2012
 
 ```{r}
 ggplot(countryTemperatureChangeAndEmission,
@@ -487,7 +489,7 @@ ggplot(countryTemperatureChangeAndEmission,
   geom_text(vjust = 1.4, size = 3, alpha = 0.6) +
   labs(title = 'Temperature changes and CO2 emission of each country from 1913-2012')
 ```
-The above chart is difficult to read. Since a lot of countries has relatively low emission, and we are not interested in neutral country, here is the plot that filter out neutral country:
+The above chart is difficult to read. Since a lot of countries has relatively low emission, and we are not interested in neutral countries, here is the plot that contain only evil emitters and unlucky receivers:
 
 ```{r}
 countryTemperatureChangeAndEmission %>%
@@ -497,7 +499,8 @@ ggplot(aes(x = `CO2 emissions (MT)`, y = `Temperature change`, label = Country, 
   geom_text(vjust = 1.4, size = 3, alpha = 0.6) +
   labs(title = 'The evil emitters and unlucky receivers (1913-2012)')
 ```
-The evil emitters, ranking by smallest temperature changes per co2 emission ratio, are:
+
+The evil emitters, ranking by smallest temperature changes per CO2 emission ratio, are:
 
 ```{r}
 countryTemperatureChangeAndEmission %>%
@@ -506,7 +509,7 @@ countryTemperatureChangeAndEmission %>%
   arrange(Ratio)
 ```
 
-The unlucky receiver, ranking by highest temperature changes per co2 emission ratio, are:
+The unlucky receiver, ranking by highest temperature changes per CO2 emission ratio, are:
 
 ```{r}
 countryTemperatureChangeAndEmission %>%
@@ -518,8 +521,15 @@ countryTemperatureChangeAndEmission %>%
 However, judging CO2 for the whole country might not be fair since smaller country are more likely to produce less co2. CO2 emission per capita can be used in the future study.
 
 
-# Discussion
+# 6. Discussion
 
 The data cleaning process in this report has given a lot of insight into how the global land temperature has annually been increasing in our chosen countries: Australia, China, Estonia, India, South Africa, Thailand, and United States. Similarly, CO2 emission levels have been increasing in all of the countries, however some countries increasing at rather more drastic increments than others. China, Unites States and India have seen a great rise in CO2 emissions, although United States seems to be doing a better job in attempting to slow down their rise with a sudden drop in emissions in the last decade. 
 
-While looking at the correlation between Co2 emission and annual land temperatures, there is a clear positive correlation between the two variables. However, the correlation is not strong enough to make any clear inferenes of Co2 emissions affecting the land temperature. Rather it seems probable there are also other varibales which should be included in such an analysis. There is opportunity to build on the current research with the intergration of further datasets.
+While looking at the correlation between CO2 emission and annual land temperatures, there is a clear positive correlation between the two variables. However, the correlation is not strong enough to make any clear inferences of CO2 emissions affecting the land temperature. Rather it seems probable there are also other variables which should be included in such an analysis. There is opportunity to build on the current research with the integration of further datasets.
+
+Even though climate changes is the global disaster, degree of effect on each country are different. From the analysis, we found some countries that has high CO2 emission but has low land temperature changes, and on the other hand, some countries that has low CO2 emission but has high land temperature changes. The limitation of our methodology is we used the whole country CO2 emission without concerning population size.
+
+
+# 7. Conclusion
+
+By combining the past countries' CO2 emission and land temperature change dataset, we can draw insights uncovering relationships between it. The study show that there is a clear positive relationship between CO2 emission and land temperature change when we focus in each country, but it doesn't seem fair when we compare ratio of CO2 emission and land temperature changed of each country around the world. These insight emphasize that climate changes is still a global issue, which require serious action from every countries.
