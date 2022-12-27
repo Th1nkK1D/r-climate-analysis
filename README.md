@@ -4,7 +4,7 @@ Paul-Markus Orav and Withee Poositasai
 
 Data Analytics in R 2022, Tallinn University
 
-**View [online notebook](th1nkk1d.github.io/r-climate-analysis/)**
+**View [online notebook](https://th1nkk1d.github.io/r-climate-analysis)**
 
 ## Project structure
 
