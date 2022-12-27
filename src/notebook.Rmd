@@ -1,5 +1,5 @@
 ---
-title: "Climate changes project"
+title: "Climate changes data analysis with R language"
 author: "Paul-Markus Orav and Withee Poositasai"
 date: "`r Sys.Date()`"
 output:
